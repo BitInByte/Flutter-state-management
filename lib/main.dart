@@ -3,22 +3,22 @@ import 'package:flutter/cupertino.dart';
 
 import './features/tasks/tasks_screen.dart';
 import './config/themes/dark_theme.dart';
-import './config/stores/store.dart';
+import './config/dependencies/store.dart';
+import './config/dependencies/constants.dart';
 
 void main() {
-  setupDependencies();
+  // Dependency injection
+  StoreDependencies.setupDependencies();
+  ConstantDependencies.setupDependencies();
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    // Let flutter be aware of providers
-    // (Dependency Injection via context)
     return MaterialApp(
       title: 'Task Management',
       theme: DarkTheme.theme,
-      /* theme: ThemeData.dark(), */
       home: TasksScreen(),
     );
   }

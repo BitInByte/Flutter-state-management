@@ -8,6 +8,7 @@
 .buildlog/
 .history
 .svn/
+lib/constants/env_values.dart
 
 # IntelliJ related
 *.iml
