@@ -3,7 +3,7 @@ import 'package:rxdart/rxdart.dart';
 import '../models/task.dart';
 import '../services/tasks_service.dart';
 
-class _TaskBloc {
+class TaskBloc {
   final _tasks = BehaviorSubject<List<Task>>();
 
   ValueStream<List<Task>> get tasks$ => _tasks.stream;
@@ -53,4 +53,4 @@ class _TaskBloc {
 
 // Generate a single instance for all the entire app
 // lifecycle
-final bloc = _TaskBloc();
+/* final bloc = _TaskBloc(); */

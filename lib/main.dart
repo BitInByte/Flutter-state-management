@@ -3,8 +3,12 @@ import 'package:flutter/cupertino.dart';
 
 import './features/tasks/tasks_screen.dart';
 import './config/themes/dark_theme.dart';
+import './config/stores/store.dart';
 
-void main() => runApp(MyApp());
+void main() {
+  setupDependencies();
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   @override

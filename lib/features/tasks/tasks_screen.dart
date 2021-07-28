@@ -1,9 +1,10 @@
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 
 import './widgets/tasks_group.dart';
-import './blocs/task_bloc.dart' as taskProvider;
+import './blocs/task_bloc.dart';
 import '../shared/widgets/platform_loading_spinner.dart';
 
 class TasksScreen extends StatefulWidget {
@@ -19,9 +20,7 @@ class _TasksScreenState extends State<TasksScreen> {
     setState(() {
       _isLoading = true;
     });
-    // Only read, doesn't rebuild
-    await taskProvider.bloc.getTasks();
-    /* await context.read<TaskProvider>().getTasks(); */
+    await GetIt.instance.get<TaskBloc>().getTasks();
     setState(() {
       _isLoading = false;
     });
@@ -30,9 +29,7 @@ class _TasksScreenState extends State<TasksScreen> {
   void _addTask() async {
     final task = _controller.text;
     if (task.length > 0) {
-      // Only read, doesn't rebuild
-      /* await context.read<TaskProvider>().addTask(task); */
-      await taskProvider.bloc.addTask(task);
+      await GetIt.instance<TaskBloc>().addTask(task);
       _controller.clear();
     }
   }
@@ -46,7 +43,7 @@ class _TasksScreenState extends State<TasksScreen> {
   @override
   void dispose() {
     super.dispose();
-    taskProvider.bloc.dispose();
+    GetIt.instance<TaskBloc>().dispose();
   }
 
   @override
