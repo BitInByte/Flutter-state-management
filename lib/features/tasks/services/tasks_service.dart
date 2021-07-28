@@ -2,11 +2,11 @@ import "dart:convert";
 import 'package:http/http.dart' as http;
 
 import '../models/task.dart';
+import '../../../constants/env_values.dart';
 
 class TasksService {
   static const _endpoint = '/tasks.json';
-  static const _url =
-      'angular-state-management-37b4e-default-rtdb.firebaseio.com';
+  static const _url = Api.URL;
 
   static final _uri = Uri.https(_url, _endpoint);
 
