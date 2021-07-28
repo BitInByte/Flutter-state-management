@@ -2,10 +2,11 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../models/task.dart';
-import '../blocs/task_bloc.dart' as taskProvider;
 import '../../shared/widgets/platform_refresh.dart';
+import '../blocs/task.dart';
 
 class TasksGroup extends StatelessWidget {
   TasksGroup();
@@ -21,17 +22,18 @@ class TasksGroup extends StatelessWidget {
         borderRadius: BorderRadius.circular(15),
         // Consume and rebuild when notifyListeners is
         // triggered.
-        child: StreamBuilder<List<Task>>(
-          stream: taskProvider.bloc.tasks$,
+        /* child: BlocBuilder<TaskCubit, List<Task>>( */
+        child: BlocBuilder<TaskBloc, List<Task>>(
           builder: (_, tasksSnapshot) {
-            if (tasksSnapshot.hasData) {
+            print(tasksSnapshot);
+            if (tasksSnapshot.isNotEmpty) {
               return ListView.builder(
                 shrinkWrap: Platform.isIOS ? true : false,
                 primary: Platform.isIOS ? false : true,
-                itemCount: tasksSnapshot.data!.length,
+                itemCount: tasksSnapshot.length,
                 itemBuilder: (ctx, index) => TaskItem(
                   /* task: tasksSnapshot.tasks[index], */
-                  task: tasksSnapshot.data![index],
+                  task: tasksSnapshot[index],
                 ),
               );
             }
@@ -45,10 +47,15 @@ class TasksGroup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Only read, doesn't rebuild
-    /* final tasksSnapshot = context.read<TaskProvider>(); */
+    // -- Cubic way --
+    final tasksSnapshot = context.read<TaskCubit>();
+    final getTasks = () async {
+      return context.read<TaskBloc>().add(
+            TaskEvent(event: TaskEvents.getTasks),
+          );
+    };
 
-    /* if (tasksSnapshot.tasks.length == 0) { */
-    if (taskProvider.bloc.tasks.length == 0) {
+    if (tasksSnapshot.tasks.length == 0) {
       return Text('No tasks added!');
     }
 
@@ -56,8 +63,10 @@ class TasksGroup extends StatelessWidget {
       return SafeArea(
         child: PlatformRefresh(
           _buildContent(),
-          taskProvider.bloc.getTasks,
+          // -- Cubic way --
           /* tasksSnapshot.getTasks, */
+          // -- Bloc way --
+          getTasks,
         ),
       );
     } else {
@@ -65,8 +74,10 @@ class TasksGroup extends StatelessWidget {
         SafeArea(
           child: _buildContent(),
         ),
+        // -- Cubic way --
         /* tasksSnapshot.getTasks, */
-        taskProvider.bloc.getTasks,
+        // -- Bloc way --
+        getTasks,
       );
     }
   }
@@ -139,7 +150,9 @@ class TaskItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Only read, doesn't rebuild
-    /* final tasksSnapshot = context.read<TaskProvider>(); */
+    // -- Cubic way --
+    final tasksSnapshot = context.read<TaskCubit>();
+
     return Container(
       color: Colors.white,
       child: Dismissible(
@@ -158,8 +171,15 @@ class TaskItem extends StatelessWidget {
         confirmDismiss: (direction) async {
           final isDismissible = await _showDialog(context);
           if (isDismissible != null && isDismissible) {
-            taskProvider.bloc.deleteTask(task.id);
+            // -- Cubic way --
             /* tasksSnapshot.deleteTask(task.id); */
+            // -- Bloc way --
+            context.read<TaskBloc>().add(
+                  TaskEvent(
+                    event: TaskEvents.deleteTask,
+                    payload: {'taskId': task.id},
+                  ),
+                );
           }
         },
         child: Column(

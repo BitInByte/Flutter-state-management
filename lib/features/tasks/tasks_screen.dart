@@ -1,10 +1,11 @@
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import './widgets/tasks_group.dart';
-import './blocs/task_bloc.dart' as taskProvider;
 import '../shared/widgets/platform_loading_spinner.dart';
+import './blocs/task.dart';
 
 class TasksScreen extends StatefulWidget {
   @override
@@ -20,8 +21,12 @@ class _TasksScreenState extends State<TasksScreen> {
       _isLoading = true;
     });
     // Only read, doesn't rebuild
-    await taskProvider.bloc.getTasks();
-    /* await context.read<TaskProvider>().getTasks(); */
+    // -- Cubic way --
+    await context.read<TaskCubit>().getTasks();
+    // -- Bloc way --
+    context.read<TaskBloc>().add(
+          TaskEvent(event: TaskEvents.getTasks),
+        );
     setState(() {
       _isLoading = false;
     });
@@ -31,8 +36,15 @@ class _TasksScreenState extends State<TasksScreen> {
     final task = _controller.text;
     if (task.length > 0) {
       // Only read, doesn't rebuild
-      /* await context.read<TaskProvider>().addTask(task); */
-      await taskProvider.bloc.addTask(task);
+      // -- Cubit way --
+      /* await context.read<TaskCubit>().addTask(task); */
+      // -- Bloc way --
+      context.read<TaskBloc>().add(
+            TaskEvent(
+              event: TaskEvents.addTask,
+              payload: {'task': task},
+            ),
+          );
       _controller.clear();
     }
   }
@@ -41,12 +53,6 @@ class _TasksScreenState extends State<TasksScreen> {
   void initState() {
     super.initState();
     _getTasks();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    taskProvider.bloc.dispose();
   }
 
   @override
