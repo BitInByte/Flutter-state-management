@@ -1,20 +1,19 @@
-import 'package:flutter/foundation.dart';
+import 'package:rxdart/rxdart.dart';
 
 import '../models/task.dart';
 import '../services/tasks_service.dart';
 
-class TaskProvider with ChangeNotifier {
-  List<Task> _tasks = [];
+class _TaskBloc {
+  final _tasks = BehaviorSubject<List<Task>>();
 
-  List<Task> get tasks {
-    return [..._tasks];
-  }
+  ValueStream<List<Task>> get tasks$ => _tasks.stream;
+
+  List<Task> get tasks => [..._tasks.value];
 
   Future<void> getTasks() async {
     try {
       final response = await TasksService.getTasks();
-      _tasks = response;
-      notifyListeners();
+      _tasks.add(response);
     } catch (error) {
       print(error);
       throw error;
@@ -24,8 +23,9 @@ class TaskProvider with ChangeNotifier {
   Future<void> addTask(String task) async {
     try {
       final response = await TasksService.addTask(task);
-      _tasks.add(response);
-      notifyListeners();
+      final newTasks = tasks;
+      newTasks.add(response);
+      _tasks.add(newTasks);
     } catch (error) {
       print(error);
       throw error;
@@ -36,12 +36,21 @@ class TaskProvider with ChangeNotifier {
     try {
       final response = await TasksService.deleteTask(taskId);
       if (response) {
-        _tasks.removeWhere((task) => task.id == taskId);
-        notifyListeners();
+        final updatedTasks = tasks;
+        updatedTasks.removeWhere((task) => task.id == taskId);
+        _tasks.add(updatedTasks);
       }
     } catch (error) {
       print(error);
       throw error;
     }
   }
+
+  void dispose() {
+    _tasks.close();
+  }
 }
+
+// Generate a single instance for all the entire app
+// lifecycle
+final bloc = _TaskBloc();

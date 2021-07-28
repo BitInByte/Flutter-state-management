@@ -1,12 +1,9 @@
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import './widgets/tasks_group.dart';
-/* import './models/task.dart'; */
-/* import './services/tasks_service.dart'; */
-import './providers/task_provider.dart';
+import './blocs/task_bloc.dart' as taskProvider;
 import '../shared/widgets/platform_loading_spinner.dart';
 
 class TasksScreen extends StatefulWidget {
@@ -23,7 +20,8 @@ class _TasksScreenState extends State<TasksScreen> {
       _isLoading = true;
     });
     // Only read, doesn't rebuild
-    await context.read<TaskProvider>().getTasks();
+    await taskProvider.bloc.getTasks();
+    /* await context.read<TaskProvider>().getTasks(); */
     setState(() {
       _isLoading = false;
     });
@@ -33,7 +31,8 @@ class _TasksScreenState extends State<TasksScreen> {
     final task = _controller.text;
     if (task.length > 0) {
       // Only read, doesn't rebuild
-      await context.read<TaskProvider>().addTask(task);
+      /* await context.read<TaskProvider>().addTask(task); */
+      await taskProvider.bloc.addTask(task);
       _controller.clear();
     }
   }
@@ -42,6 +41,12 @@ class _TasksScreenState extends State<TasksScreen> {
   void initState() {
     super.initState();
     _getTasks();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    taskProvider.bloc.dispose();
   }
 
   @override
@@ -111,12 +116,15 @@ class _TasksScreenState extends State<TasksScreen> {
               },
               icon: const Icon(
                 Icons.add,
-                color: Colors.pink,
+                color: Colors.white,
               ),
             ),
           if (Platform.isIOS)
             CupertinoButton(
-              child: Icon(CupertinoIcons.add),
+              child: Icon(
+                CupertinoIcons.add,
+                color: Colors.white,
+              ),
               onPressed: () {
                 showCupertinoModalPopup(
                   context: context,
@@ -147,8 +155,10 @@ class _TasksScreenState extends State<TasksScreen> {
                                 ),
                               ),
                               CupertinoButton(
-                                child:
-                                    Icon(CupertinoIcons.arrow_up_circle_fill),
+                                child: Icon(
+                                  CupertinoIcons.arrow_up_circle_fill,
+                                  color: Colors.pink,
+                                ),
                                 onPressed: () {
                                   Navigator.of(ctx).pop();
                                   _addTask();
