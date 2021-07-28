@@ -10,25 +10,13 @@ class PlatformRefresh extends StatelessWidget {
 
   Widget _buildIos() {
     return CustomScrollView(
-      /* physics: BouncingScrollPhysics(), */
       slivers: [
         CupertinoSliverRefreshControl(
           onRefresh: onRefreshHandler,
         ),
-        /* SliverFillRemaining( */
-        /* [> child: SafeArea(child: content), <] */
-        /* child: content, */
-        /* ) */
-        /* SliverSafeArea(sliver: content) */
-        /* SliverToBoxAdapter(child: SafeArea(child: content)) */
-        /* SafeArea(child: SliverToBoxAdapter(child: content,),) */
         SliverToBoxAdapter(
           child: content,
         )
-        /* SafeArea( */
-        /* child: SliverToBoxAdapter( */
-        /* child: content, */
-        /* )), */
       ],
     );
   }

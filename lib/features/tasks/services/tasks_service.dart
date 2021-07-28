@@ -6,25 +6,16 @@ import '../models/task.dart';
 class TasksService {
   static const _endpoint = '/tasks.json';
   static const _url =
-      /* 'https://angular-state-management-37b4e-default-rtdb.firebaseio.com'; */
       'angular-state-management-37b4e-default-rtdb.firebaseio.com';
-  /* static final String _url; */
 
-  /* TasksService() : */
-  /* _url = 'https://angular-state-management-37b4e-default-rtdb.firebaseio.com/$_endpoint'; */
   static final _uri = Uri.https(_url, _endpoint);
 
   static Future<List<Task>> getTasks() async {
-    /* static Future<void> getTasks() async { */
-    /* var url = Uri.https(_url, _endpoint); */
-    print(_uri);
     List<Task> tasks = [];
     try {
       final response = await http.get(_uri);
-      print(response.body);
       if (response.statusCode == 200) {
         var responseData = json.decode(response.body) as Map<String, dynamic>;
-        print(responseData);
         responseData.forEach((taskId, task) {
           tasks.add(
             Task(
@@ -52,11 +43,6 @@ class TasksService {
             'time': time,
           }));
 
-      print("Add Task");
-      print(task);
-
-      print(response.body);
-
       final responseBody = json.decode(response.body) as Map<String, dynamic>;
 
       return Task(
@@ -65,6 +51,7 @@ class TasksService {
         timestamp: DateTime.fromMillisecondsSinceEpoch(time),
       );
     } catch (error) {
+      print(error);
       throw error;
     }
   }
@@ -78,6 +65,7 @@ class TasksService {
       }
       return true;
     } catch (error) {
+      print(error);
       throw error;
     }
   }

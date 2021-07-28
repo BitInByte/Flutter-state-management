@@ -53,51 +53,9 @@ class _TasksScreenState extends State<TasksScreen> {
     _getTasks();
   }
 
-  Widget _buildWidget(
-    BuildContext context,
-    Widget body,
-  ) {
-    if (Platform.isIOS) {
-      return CupertinoPageScaffold(
-        navigationBar: CupertinoNavigationBar(
-          middle: Text('Task Management'),
-        ),
-        child: body,
-      );
-    } else {
-      return Scaffold(
-        /* return CupertinoPageScaffold( */
-        appBar: AppBar(
-          title: Text('Task Management'),
-        ),
-        body: body,
-      );
-    }
-  }
-
-  PreferredSizeWidget _buildAppBar(BuildContext context, String title) {
-    if (Platform.isIOS) {
-      return CupertinoNavigationBar(
-        middle: Text(title),
-        brightness: Brightness.light,
-      );
-    } else {
-      return AppBar(
-        title: Text(title),
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    /* return _buildWidget( */
-    /* context, */
-    /* Center( */
-    /* child: TasksGroup(), */
-    /* ), */
-    /* ); */
     return Scaffold(
-      /* return CupertinoPageScaffold( */
       appBar: AppBar(
         title: Text('Task Management'),
         actions: <Widget>[
@@ -105,13 +63,7 @@ class _TasksScreenState extends State<TasksScreen> {
             IconButton(
               onPressed: () {
                 showModalBottomSheet(
-                  /* Scaffold.of(context).showBottomSheet( */
-                  /* (context) => Container( */
                   context: context,
-                  /* builder: (ctx) => Text( */
-                  /* 'This is a modal', */
-                  /* style: Theme.of(context).textTheme.headline5, */
-                  /* ) */
                   builder: (ctx) => Wrap(
                     children: [
                       Column(
@@ -224,11 +176,6 @@ class _TasksScreenState extends State<TasksScreen> {
             )
         ],
       ),
-      /* appBar: _buildAppBar(context, 'Task Management'), */
-      /* appBar: CupertinoNavigationBar(), */
-      /* navigationBar: CupertinoNavigationBar( */
-      /* middle: Text('Task Management'), */
-      /* ), */
       body: Center(
         child: _isLoading
             ? LoadingSpinner()
