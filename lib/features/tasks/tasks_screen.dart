@@ -1,10 +1,12 @@
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import './widgets/tasks_group.dart';
-import 'models/task.dart';
-import './services/tasks_service.dart';
+/* import './models/task.dart'; */
+/* import './services/tasks_service.dart'; */
+import './providers/task_provider.dart';
 import '../shared/widgets/platform_loading_spinner.dart';
 
 class TasksScreen extends StatefulWidget {
@@ -13,7 +15,6 @@ class TasksScreen extends StatefulWidget {
 }
 
 class _TasksScreenState extends State<TasksScreen> {
-  List<Task> _tasks = [];
   var _isLoading = false;
   final _controller = new TextEditingController();
 
@@ -21,29 +22,19 @@ class _TasksScreenState extends State<TasksScreen> {
     setState(() {
       _isLoading = true;
     });
-    final tasksResponse = await TasksService.getTasks();
+    // Only read, doesn't rebuild
+    await context.read<TaskProvider>().getTasks();
     setState(() {
-      _tasks = tasksResponse;
       _isLoading = false;
     });
   }
 
   void _addTask() async {
-    if (_controller.text.length > 0) {
-      final taskResponse = await TasksService.addTask(_controller.text);
-      setState(() {
-        _tasks.add(taskResponse);
-      });
-    }
-  }
-
-  void _deleteTask(String taskId) async {
-    final taskDeleteSuccess = await TasksService.deleteTask(taskId);
-
-    if (taskDeleteSuccess) {
-      setState(() {
-        _tasks.removeWhere((task) => task.id == taskId);
-      });
+    final task = _controller.text;
+    if (task.length > 0) {
+      // Only read, doesn't rebuild
+      await context.read<TaskProvider>().addTask(task);
+      _controller.clear();
     }
   }
 
@@ -156,12 +147,10 @@ class _TasksScreenState extends State<TasksScreen> {
                                 ),
                               ),
                               CupertinoButton(
-                                /* child: Icon(Icons.send), */
                                 child:
                                     Icon(CupertinoIcons.arrow_up_circle_fill),
                                 onPressed: () {
                                   Navigator.of(ctx).pop();
-
                                   _addTask();
                                 },
                               ),
@@ -177,9 +166,7 @@ class _TasksScreenState extends State<TasksScreen> {
         ],
       ),
       body: Center(
-        child: _isLoading
-            ? LoadingSpinner()
-            : TasksGroup(_tasks, _deleteTask, _getTasks),
+        child: _isLoading ? LoadingSpinner() : TasksGroup(),
       ),
     );
   }

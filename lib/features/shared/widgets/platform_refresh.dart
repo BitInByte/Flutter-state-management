@@ -1,11 +1,11 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/cupertino.dart' hide RefreshCallback;
 
 class PlatformRefresh extends StatelessWidget {
   final Widget content;
-  final Future<void> Function() onRefreshHandler;
+  final RefreshCallback onRefreshHandler;
   PlatformRefresh(this.content, this.onRefreshHandler);
 
   Widget _buildIos() {

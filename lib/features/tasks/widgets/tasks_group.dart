@@ -1,16 +1,15 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 
 import '../models/task.dart';
+import '../providers/task_provider.dart';
 import '../../shared/widgets/platform_refresh.dart';
 
 class TasksGroup extends StatelessWidget {
-  final List<Task> _tasks;
-  final Function _deleteTask;
-  final Future<void> Function() _getTasks;
-  TasksGroup(this._tasks, this._deleteTask, this._getTasks);
+  TasksGroup();
 
   Widget _buildContent() {
     return Container(
@@ -21,14 +20,17 @@ class TasksGroup extends StatelessWidget {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(15),
-        child: ListView.builder(
-          shrinkWrap: Platform.isIOS ? true : false,
-          /* scrollDirection: Axis.vertical, */
-          primary: Platform.isIOS ? false : true,
-          /* clipBehavior: Clip.antiAlias, */
-          itemCount: _tasks.length,
-          itemBuilder: (ctx, index) =>
-              TaskItem(task: _tasks[index], onDeleteTask: _deleteTask),
+        // Consume and rebuild when notifyListeners is
+        // triggered.
+        child: Consumer<TaskProvider>(
+          builder: (_, tasksSnapshot, __) => ListView.builder(
+            shrinkWrap: Platform.isIOS ? true : false,
+            primary: Platform.isIOS ? false : true,
+            itemCount: tasksSnapshot.tasks.length,
+            itemBuilder: (ctx, index) => TaskItem(
+              task: tasksSnapshot.tasks[index],
+            ),
+          ),
         ),
       ),
     );
@@ -36,24 +38,35 @@ class TasksGroup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (_tasks.length == 0) {
+    // Only read, doesn't rebuild
+    final tasksSnapshot = context.read<TaskProvider>();
+
+    if (tasksSnapshot.tasks.length == 0) {
       return Text('No tasks added!');
     }
 
     if (Platform.isIOS) {
-      return SafeArea(child: PlatformRefresh(_buildContent(), _getTasks));
+      return SafeArea(
+        child: PlatformRefresh(
+          _buildContent(),
+          tasksSnapshot.getTasks,
+        ),
+      );
     } else {
-      return PlatformRefresh(SafeArea(child: _buildContent()), _getTasks);
+      return PlatformRefresh(
+        SafeArea(
+          child: _buildContent(),
+        ),
+        tasksSnapshot.getTasks,
+      );
     }
   }
 }
 
 class TaskItem extends StatelessWidget {
-  const TaskItem({Key? key, required this.task, required this.onDeleteTask})
-      : super(key: key);
+  const TaskItem({Key? key, required this.task}) : super(key: key);
 
   final Task task;
-  final Function onDeleteTask;
 
   Future<bool?> _showDialog(BuildContext ctx) {
     final navigator = Navigator.of(ctx);
@@ -116,6 +129,8 @@ class TaskItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Only read, doesn't rebuild
+    final tasksSnapshot = context.read<TaskProvider>();
     return Container(
       color: Colors.white,
       child: Dismissible(
@@ -134,7 +149,7 @@ class TaskItem extends StatelessWidget {
         confirmDismiss: (direction) async {
           final isDismissible = await _showDialog(context);
           if (isDismissible != null && isDismissible) {
-            onDeleteTask(task.id);
+            tasksSnapshot.deleteTask(task.id);
           }
         },
         child: Column(
