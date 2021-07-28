@@ -126,7 +126,10 @@ class _TasksScreenState extends State<TasksScreen> {
             ),
           if (Platform.isIOS)
             CupertinoButton(
-              child: Icon(CupertinoIcons.add),
+              child: Icon(
+                CupertinoIcons.add,
+                color: Colors.white,
+              ),
               onPressed: () {
                 showCupertinoModalPopup(
                   context: context,
@@ -158,8 +161,10 @@ class _TasksScreenState extends State<TasksScreen> {
                               ),
                               CupertinoButton(
                                 /* child: Icon(Icons.send), */
-                                child:
-                                    Icon(CupertinoIcons.arrow_up_circle_fill),
+                                child: Icon(
+                                  CupertinoIcons.arrow_up_circle_fill,
+                                  color: Colors.pink,
+                                ),
                                 onPressed: () {
                                   Navigator.of(ctx).pop();
 
