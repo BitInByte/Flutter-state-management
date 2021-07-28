@@ -34,6 +34,7 @@ class _TasksScreenState extends State<TasksScreen> {
       setState(() {
         _tasks.add(taskResponse);
       });
+      _controller.clear();
     }
   }
 
