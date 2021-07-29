@@ -2,16 +2,18 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 
 import '../models/task.dart';
+import '../store/tasks.dart';
 import '../../shared/widgets/platform_refresh.dart';
-import '../blocs/task.dart';
 
 class TasksGroup extends StatelessWidget {
   TasksGroup();
 
-  Widget _buildContent() {
+  Widget _buildContent(BuildContext ctx) {
+    final tasksStore = ctx.read<TasksStore>();
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.symmetric(
@@ -20,20 +22,17 @@ class TasksGroup extends StatelessWidget {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(15),
-        // Consume and rebuild when notifyListeners is
-        // triggered.
-        /* child: BlocBuilder<TaskCubit, List<Task>>( */
-        child: BlocBuilder<TaskBloc, List<Task>>(
-          builder: (_, tasksSnapshot) {
-            print(tasksSnapshot);
-            if (tasksSnapshot.isNotEmpty) {
+        // Subscribe to the observable automatically
+        // and re-render whenever the state changes
+        child: Observer(
+          builder: (_) {
+            if (tasksStore.tasks.isNotEmpty) {
               return ListView.builder(
                 shrinkWrap: Platform.isIOS ? true : false,
                 primary: Platform.isIOS ? false : true,
-                itemCount: tasksSnapshot.length,
+                itemCount: tasksStore.tasks.length,
                 itemBuilder: (ctx, index) => TaskItem(
-                  /* task: tasksSnapshot.tasks[index], */
-                  task: tasksSnapshot[index],
+                  task: tasksStore.tasks[index],
                 ),
               );
             }
@@ -47,37 +46,32 @@ class TasksGroup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Only read, doesn't rebuild
-    // -- Cubic way --
-    final tasksSnapshot = context.read<TaskCubit>();
-    final getTasks = () async {
-      return context.read<TaskBloc>().add(
-            TaskEvent(event: TaskEvents.getTasks),
-          );
-    };
+    /* // -- Cubic way -- */
+    /* final tasksSnapshot = context.read<TaskCubit>(); */
+    /* final getTasks = () async { */
+    /* return context.read<TaskBloc>().add( */
+    /* TaskEvent(event: TaskEvents.getTasks), */
+    /* ); */
+    /* }; */
+    final tasksStore = context.read<TasksStore>();
 
-    if (tasksSnapshot.tasks.length == 0) {
+    if (tasksStore.tasks.length == 0) {
       return Text('No tasks added!');
     }
 
     if (Platform.isIOS) {
       return SafeArea(
         child: PlatformRefresh(
-          _buildContent(),
-          // -- Cubic way --
-          /* tasksSnapshot.getTasks, */
-          // -- Bloc way --
-          getTasks,
+          _buildContent(context),
+          tasksStore.getTasks,
         ),
       );
     } else {
       return PlatformRefresh(
         SafeArea(
-          child: _buildContent(),
+          child: _buildContent(context),
         ),
-        // -- Cubic way --
-        /* tasksSnapshot.getTasks, */
-        // -- Bloc way --
-        getTasks,
+        tasksStore.getTasks,
       );
     }
   }
@@ -150,8 +144,7 @@ class TaskItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Only read, doesn't rebuild
-    // -- Cubic way --
-    final tasksSnapshot = context.read<TaskCubit>();
+    final tasksStore = context.read<TasksStore>();
 
     return Container(
       color: Colors.white,
@@ -172,14 +165,7 @@ class TaskItem extends StatelessWidget {
           final isDismissible = await _showDialog(context);
           if (isDismissible != null && isDismissible) {
             // -- Cubic way --
-            /* tasksSnapshot.deleteTask(task.id); */
-            // -- Bloc way --
-            context.read<TaskBloc>().add(
-                  TaskEvent(
-                    event: TaskEvents.deleteTask,
-                    payload: {'taskId': task.id},
-                  ),
-                );
+            tasksStore.deleteTask(task.id);
           }
         },
         child: Column(
