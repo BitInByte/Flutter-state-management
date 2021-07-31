@@ -1,55 +1,50 @@
-import 'package:mobx/mobx.dart';
-
+import 'package:get/get.dart';
 import '../models/task.dart';
 import '../services/tasks_service.dart';
 
-// We have to run: flutter packages pub run build_runner build
-// in order to generate the files for this store for
-// annotations to work
-part 'tasks.g.dart';
+class TasksStore extends GetxController {
+  /* List<Rx<Task>> tasks = <Rx<Task>>[].obs; */
 
-class TasksStore = _TasksStore with _$TasksStore;
+  RxList<Task> tasks = RxList<Task>();
 
-abstract class _TasksStore with Store {
-  @observable
-  List<Task> tasks = [];
-
-  @action
   Future<void> getTasks() async {
     try {
       final response = await TasksService.getTasks();
-      tasks = response;
+      /* tasks = _convertTasks(response); */
+      tasks = RxList.of(response);
     } catch (error) {
       print(error);
       throw error;
     }
   }
 
-  @action
   Future<void> addTask(String task) async {
     try {
       final response = await TasksService.addTask(task);
-      final newTasks = tasks;
+      final newTasks = [...tasks];
       newTasks.add(response);
-      tasks = newTasks;
+      tasks = RxList.of(newTasks);
     } catch (error) {
       print(error);
       throw error;
     }
   }
 
-  @action
   Future<void> deleteTask(String taskId) async {
     try {
       final response = await TasksService.deleteTask(taskId);
       if (response) {
-        final updatedTasks = tasks;
+        final updatedTasks = [...tasks];
         updatedTasks.removeWhere((task) => task.id == taskId);
-        tasks = updatedTasks;
+        tasks = RxList.of(updatedTasks);
       }
     } catch (error) {
       print(error);
       throw error;
     }
+  }
+
+  List<Rx<Task>> _convertTasks(List<Task> tasks) {
+    return tasks.map((task) => task.obs).toList();
   }
 }

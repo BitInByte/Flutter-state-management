@@ -2,18 +2,19 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
-import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:get/get.dart';
 
 import '../models/task.dart';
 import '../store/tasks.dart';
 import '../../shared/widgets/platform_refresh.dart';
 
 class TasksGroup extends StatelessWidget {
+  final _diController = Get.find<TasksStore>();
   TasksGroup();
 
   Widget _buildContent(BuildContext ctx) {
-    final tasksStore = ctx.read<TasksStore>();
+    print(_diController.tasks[0]);
+    /* final tasksStore = ctx.read<TasksStore>(); */
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.symmetric(
@@ -24,15 +25,16 @@ class TasksGroup extends StatelessWidget {
         borderRadius: BorderRadius.circular(15),
         // Subscribe to the observable automatically
         // and re-render whenever the state changes
-        child: Observer(
-          builder: (_) {
-            if (tasksStore.tasks.isNotEmpty) {
+        child: GetX<TasksStore>(
+          builder: (tasksController) {
+            print(tasksController.tasks[0]);
+            if (tasksController.tasks.isNotEmpty) {
               return ListView.builder(
                 shrinkWrap: Platform.isIOS ? true : false,
                 primary: Platform.isIOS ? false : true,
-                itemCount: tasksStore.tasks.length,
+                itemCount: tasksController.tasks.length,
                 itemBuilder: (ctx, index) => TaskItem(
-                  task: tasksStore.tasks[index],
+                  task: tasksController.tasks[index],
                 ),
               );
             }
@@ -53,9 +55,9 @@ class TasksGroup extends StatelessWidget {
     /* TaskEvent(event: TaskEvents.getTasks), */
     /* ); */
     /* }; */
-    final tasksStore = context.read<TasksStore>();
+    /* final tasksStore = context.read<TasksStore>(); */
 
-    if (tasksStore.tasks.length == 0) {
+    if (_diController.tasks.length == 0) {
       return Text('No tasks added!');
     }
 
@@ -63,7 +65,7 @@ class TasksGroup extends StatelessWidget {
       return SafeArea(
         child: PlatformRefresh(
           _buildContent(context),
-          tasksStore.getTasks,
+          _diController.getTasks,
         ),
       );
     } else {
@@ -71,16 +73,17 @@ class TasksGroup extends StatelessWidget {
         SafeArea(
           child: _buildContent(context),
         ),
-        tasksStore.getTasks,
+        _diController.getTasks,
       );
     }
   }
 }
 
 class TaskItem extends StatelessWidget {
-  const TaskItem({Key? key, required this.task}) : super(key: key);
+  TaskItem({Key? key, required this.task}) : super(key: key);
 
   final Task task;
+  final _diController = Get.find<TasksStore>();
 
   Future<bool?> _showDialog(BuildContext ctx) {
     final navigator = Navigator.of(ctx);
@@ -144,7 +147,7 @@ class TaskItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Only read, doesn't rebuild
-    final tasksStore = context.read<TasksStore>();
+    /* final tasksStore = context.read<TasksStore>(); */
 
     return Container(
       color: Colors.white,
@@ -165,7 +168,7 @@ class TaskItem extends StatelessWidget {
           final isDismissible = await _showDialog(context);
           if (isDismissible != null && isDismissible) {
             // -- Cubic way --
-            tasksStore.deleteTask(task.id);
+            _diController.deleteTask(task.id);
           }
         },
         child: Column(

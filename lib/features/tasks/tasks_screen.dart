@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:get/get.dart';
 
 import './widgets/tasks_group.dart';
 import './store/tasks.dart';
@@ -15,13 +15,15 @@ class TasksScreen extends StatefulWidget {
 class _TasksScreenState extends State<TasksScreen> {
   var _isLoading = false;
   final _controller = new TextEditingController();
+  final _diController = Get.find<TasksStore>();
 
   Future<void> _getTasks() async {
     setState(() {
       _isLoading = true;
     });
     // Only read, doesn't rebuild
-    await context.read<TasksStore>().getTasks();
+    await _diController.getTasks();
+    /* await context.read<TasksStore>().getTasks(); */
 
     setState(() {
       _isLoading = false;
@@ -32,7 +34,8 @@ class _TasksScreenState extends State<TasksScreen> {
     final task = _controller.text;
     if (task.length > 0) {
       // Only read, doesn't rebuild
-      context.read<TasksStore>().addTask(task);
+      /* context.read<TasksStore>().addTask(task); */
+      await _diController.addTask(task);
       _controller.clear();
     }
   }
